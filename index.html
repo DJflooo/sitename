@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Word Typing Game</title>
+    <style>
+        /* Basic reset and full height for body */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to bottom, white, black);
+        }
+
+        /* Header Styling */
+        .header {
+            background-color: Blue;
+            color: black;
+            text-align: center;
+            padding: 20px;
+            font-size: 48px;
+        }
+
+        /* Paragraph Styling (centered content) */
+        .paragraph {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        /* Input Box Styling */
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        /* Styling for displaying random word */
+        .random-word-container {
+            position: relative; /* Make it easier to position the score */
+            display: inline-block;
+        }
+
+        .random-word {
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+        }
+
+        /* Styling for the score */
+        .score {
+            position: absolute;
+            top: -30px; /* Adjust the position above the word */
+            right: -50px; /* Position it to the right of the word */
+            font-size: 20px;
+            font-weight: bold;
+            color: blue;
+            white-space: nowrap; /* Prevents the score from wrapping to the next line */
+            min-width: 70px; /* Optional: Ensures there is enough space for the score */
+            text-align: center; /* Ensures the text is centered within its container */
+        }
+
+        /* Styling for feedback message */
+        .feedback {
+            font-size: 20px;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header stays at the top -->
+    <div class="header">
+        EXAMPLE NAME
+    </div>
+
+    <!-- Centered content inside paragraph -->
+    <div class="paragraph">
+        <div class="random-word-container">
+            <div class="random-word" id="randomWord">Press the button to get a word</div> <!-- Random word will appear here -->
+            <div class="score" id="score">Score: 0</div> <!-- Score will be displayed here -->
+        </div>
+        <input type="text" id="inputBox" placeholder="Type the word here">
+        <div class="feedback" id="feedback"></div> <!-- Feedback will appear here -->
+        <button onclick="displayRandomWord()", id="button">Get Random Word</button>
+    </div>
+
+    <script>
+        // List of words
+        const words = [
+            "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", 
+            "mango", "nectarine", "orange", "papaya", "quince", "raspberry", "strawberry", "tangerine", "ugli", "watermelon", 
+            "apricot", "blueberry", "cantaloupe", "dragonfruit", "eggplant", "fig", "guava", "jackfruit", "kumquat", "lime", 
+            "melon", "nectar", "olive", "pear", "plum", "pomegranate", "soursop", "tamarind", "zucchini", "avocado", 
+            "bamboo", "cactus", "daffodil", "eucalyptus", "fern", "grapevine", "hibiscus", "iris", "jasmine", "lilac", 
+            "magnolia", "orchid", "petunia", "rose", "sunflower", "tulip", "violet", "wisteria", "xenophora", "yucca", 
+            "zinnia", "alpine", "butterfly", "clover", "dandelion", "evergreen", "flax", "ginseng", "holly", "ivy", 
+            "juniper", "kiwi", "laurel", "maple", "nutmeg", "oak", "pine", "quince", "redwood", "saffron", "thyme", 
+            "verbena", "willow", "yew", "zebra", "basketball", "baseball", "soccer", "football", "tennis", "volleyball", 
+            "rugby", "golf", "hockey", "bowling", "cricket", "athletics", "swimming", "boxing", "karate", "judo", 
+            "wrestling", "cycling", "running", "skating", "skiing", "archery", "fencing", "pingpong", "chess", 
+            "checkers", "cards", "scrabble", "poker", "monopoly", "clue", "battleship", "risk", "go", "mahjong", 
+            "chinesecheckers", "backgammon", "ludo", "dominoes", "parcheesi", "bananagrams", "sudoku", "crossword", 
+            "tictactoe", "wordsearch", "hangman", "chinese", "english", "spanish", "french", "german", "italian", 
+            "portuguese", "russian", "japanese", "chinese", "korean", "arabic", "hebrew", "hindi", "urdu", 
+            "swahili", "bengali", "marathi", "tamil", "telugu", "kannada", "punjabi", "gujarati", "malayalam", 
+            "odia", "assamese", "sanskrit", "afrikaans", "dutch", "norwegian", "swedish", "danish", "icelandic", 
+            "finnish", "polish", "czech", "slovak", "hungarian", "romanian", "bulgarian", "serbian", "croatian", 
+            "bosnian", "slovenian", "greek", "turkish", "georgian", "armenian", "kazakh", "uzbek", "kyrgyz", 
+            "tajik", "turkmen", "mongolian", "vietnamese", "thai", "filipino", "malay", "indonesian", "burmese", 
+            "lao", "khmer", "nepali", "sinhala", "tibetan", "mongolian", "hindi", "hebrew", "swahili", "lingala", 
+            "chichewa", "zulu", "afrikaans", "xhosa", "tswana", "sesotho", "venda", "tsonga", "ndebele", "shona"]
+
+            const cursedWords = [
+                "abyss", "blackout", "decay", "phantom", "haunting", "nightmare", "shadow", "crypt", 
+                "cursed", "death", "sacrifice", "eternity", "wraith", "ghost", "demon", "sinister", "miasma", "shiver",
+                "horror", "wrath", "murder", "mutilation", "blood", "scream", "torment", "paranoia", "madness",
+                "insanity", "night", "hellfire", "dread", "misery", "creep", "phantasm", "reaper", "deathless",
+                "wither", "demonology", "rotting", "skull", "bone", "undertaker", "cryptic", "morbid", "ghastly",
+                "specter", "possession", "evisceration", "soul", "graveyard", "flesh", "ravenous", "nightshade",
+                "scalpel", "claws", "witchcraft", "necrosis", "gore", "disembowel", "abyssal", "forsaken", "fright",
+                "gloom", "purgatory", "revelation", "incantation", "evil", "soulmate", "wailing", "wretched", "vampire",
+                "curse", "tormenting", "cavern", "banshee", "screech", "lurking", "cryptkeeper", "twisted", "malice",
+                "darkness", "soulbound", "misfortune", "unholy", "dismember", "gloomy", "demoness", "mangled", "pestilence",
+                "sickening", "plague", "venom", "writhing", "fiend", "wail", "maggots", "mummify", "vengeance",
+                "rotted", "creature", "hag", "slaughter", "fiendish", "vile", "blasphemy", "hollow", "lunacy",
+                "vicious", "nightmarish", "torture", "undead", "disgusting", "cacophony", "delirium", "shrouded",
+                "invasion", "ghoul", "bloodlust", "psychosis", "tormented", "revelation", "ravage", "bile", "sacrifice",
+                "insidious", "chill", "raven", "dismay", "unearthly", "mourn", "haggard", "frenzied", "rotten", 
+                "decaying", "wretched", "sinister", "abomination", "ghoulish", "misery", "horrid", "spectral",
+                "phantasmagoria", "tremor", "gruesome", "suffering", "soulpiercer", "devoured", "tattered", "paralyzed",
+                "shudder", "grotesque", "ritual", "relinquish", "cursebound", "malignant", "wounded", "brutal",
+                "tormented", "macabre", "bloodcurdling", "decrepit", "whispers", "mourning", "dying",
+                "putrid", "eerie", "spinechilling", "twisted", "ominous", "ominously", "lurking", "wretchedness",
+                "rancid", "abandoned", "lunatic", "deadman's", "dying breath", "revolution", "unseen", "blackened",
+                "noose", "unforgiven", "rotting", "wretched", "repercussion", "anxiety", "forgotten", "maggot",
+                "ripple", "decrepitude", "decayed", "vile", "gore", "sodden", "psychotic", "exsanguinate"
+            ];
+            const manipulatorPhrases = [
+    "You are mine.", 
+    "I see you.",
+    "Don't look away.",
+    "It is too late.",
+    "You will listen.",
+    "Stay with me.",
+    "I control you.",
+    "You cannot hide.",
+    "It's already begun.",
+    "I am watching.",
+    "You cannot escape.",
+    "Do not speak.",
+    "Do you hear me?",
+    "Your time is up.",
+    "It’s inevitable.",
+    "I own you.",
+    "You can't leave.",
+    "I’m inside you.",
+    "You are nothing.",
+    "Trust no one.",
+    "I have no mercy.",
+    "Come closer.",
+    "There is no escape.",
+    "Feel my presence.",
+    "The end is near.",
+    "Don’t fight it.",
+    "You will obey.",
+    "You are not alone.",
+    "It will find you.",
+    "I will always be here.",
+    "You belong to me.",
+    "Nothing matters anymore.",
+    "Your soul is mine.",
+    "Time is running out.",
+    "You’re already lost.",
+    "I can make you suffer.",
+    "I never forget.",
+    "Watch carefully.",
+    "This is not over.",
+    "Nothing is real.",
+    "It’s all a game.",
+    "Can you feel it?",
+    "I am everywhere.",
+    "You’re too late.",
+    "I hear your thoughts.",
+    "The walls are closing in.",
+    "Stop running.",
+    "It's too late to fight.",
+    "I know your fears.",
+    "There’s no way out.",
+    "I have your heart.",
+    "You’re mine forever.",
+    "Everything ends now.",
+    "You can't run from me.",
+    "You think you’re safe.",
+    "You are my puppet.",
+    "I can make you see.",
+    "Let me in.",
+    "This is your fate.",
+    "The door is locked.",
+    "You will serve me.",
+    "No one can save you.",
+    "I will break you.",
+    "Time is on my side.",
+    "You’re already trapped.",
+    "I am the darkness.",
+    "You are the prey.",
+    "There is no way out.",
+    "Your mind is mine.",
+    "Can you feel my breath?",
+    "The game has just begun.",
+    "You will never escape.",
+    "Your nightmare has begun.",
+    "I will find you.",
+    "You are nothing but a toy.",
+    "You cannot escape your fate.",
+    "I will find a way.",
+    "I know what you fear.",
+    "Don’t make a sound.",
+    "There is no hiding.",
+    "Can you hear them?",
+    "You can’t escape me.",
+    "My eyes are everywhere.",
+    "You’re already trapped.",
+    "Everything you know is a lie.",
+    "You’ve been marked.",
+    "There is no salvation.",
+    "You cannot see me.",
+    "I will come for you.",
+    "The end is just the beginning.",
+    "I am always watching.",
+    "Do you feel it now?",
+    "Nothing can save you.",
+    "You will never wake up.",
+    "The end is near.",
+    "It’s already too late."
+            ];
+
+            const monologuePhrases = [
+                "Hello",
+                "You can hear me ?",
+                "Good",
+                "Beause you can't escape anymore",
+                "I'm here",
+                "You are here",
+                "Stop running",
+                "You can't anymore",
+                "Just listen",
+                "Because you won't be able to anymore",
+                "Nothing can stop me",
+                "Nothing can stop us",
+                "Just die",
+                "die",
+                "die",
+                "die",
+                "DIE",
+                "DIE",
+                "DIE DIE DIE",
+                "DIE DIE DIE DIE DIE",
+                "DIEDIEDIEDIEDIEDIEDIEDIEDIEDIEDIEDIEDIEDIEDIEDIE",
+                "DIediedIEDIEDIediEDIEDIEdiediEDIEDIEDiedIedIEDIEDIEDiediEDIIIIREQSVVTSRCHRYTBURTBYHSBR"
+            ];
+
+let currentWord = ""; // Variable to store the current random word
+let score = 0; // Variable to track the score
+let done = false; // Variable to track if the false error messages have been shown
+let index = 0; // Variable to track the index of the new phrases
+
+// Function to pick and display a random word
+function displayRandomWord() {
+    if (score === 10100 && done === false) {
+        alert("An unexpected error occurred. Please try again later.");
+        alert("Unindentified list entry. Please try again later.");
+        alert("Unindentified exterior list entry. Please try again later.");
+        alert("Forced exterior list conversion started. Please wait.");
+        alert("Forced exterior list conversion completed. Please press OK to go back to the game.");
+        done = true;
+        displayRandomWord();
+        return;
+    }
+
+    if (score <= 3000) {
+        const randomIndex = Math.floor(Math.random() * words.length); // Get a random index
+        currentWord = words[randomIndex]; // Get the word at the random index
+    } else if (score >= 6000 && score < 10100) {
+        const randomIndex = Math.floor(Math.random() * (10000 - score));
+        const randomIndex2 = Math.floor(Math.random() * (10000 - score));
+        if (randomIndex == randomIndex2) {
+            const randomIndex = Math.floor(Math.random() * manipulatorPhrases.length);
+            currentWord = manipulatorPhrases[randomIndex];
+        } else {
+            const randomIndex = Math.floor(Math.random() * cursedWords.length); // Get a random index
+            currentWord = cursedWords[randomIndex]; // Get the word at the random index
+        }
+    } else if (score >= 10000) {
+        if (index < monologuePhrases.length) {
+            currentWord = monologuePhrases[index];
+            index++;
+        } else {
+            setTimeout(function() {
+                alert("Next entries do not match with standard list entries. Please wait until we try to find the problem.");
+                setTimeout(function() {
+                    alert("The problem could not be found. The game has been stoped. Sorry for the disturbance.");
+                    alert("Sending you to home page...");
+                    document.getElementById("inputBox").style.display = "none";
+                    document.getElementById("randomWord").style.display = "none";
+                    document.getElementById("feedback").style.display = "none";
+                    document.getElementById("button").style.display = "none";
+                    document.getElementById("score").textContent = "Well done you have " + score + " points ! Wanna try again ?";
+                }, 5000); // Display error message after 5 seconds
+            }, 2000); // Display error message after 2 seconds
+        }
+    } else {
+        const randomIndex = Math.floor(Math.random() * cursedWords.length); // Get a random index
+        currentWord = cursedWords[randomIndex]; // Get the word at the random index
+    }
+
+    document.getElementById("randomWord").textContent = currentWord; // Display the random word on the page
+    document.getElementById("inputBox").value = ""; // Clear the input box
+}
+        // Event listener for the Enter key press to verify input
+        document.getElementById("inputBox").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {  // Check if Enter key is pressed
+                const userInput = document.getElementById("inputBox").value.trim();
+                
+                if (userInput === currentWord) {
+                    document.getElementById("feedback").textContent = "Correct! Well done!";
+                    document.getElementById("feedback").style.color = "green";
+
+                    // Increment score by 100 if the word is correct
+                    score += 100;
+                    document.getElementById("score").textContent = "Score: " + score;
+                } else {
+                    document.getElementById("feedback").textContent = "Keep trying...";
+                    document.getElementById("feedback").style.color = "red";
+                }
+
+                // Clear the input box after verification
+                document.getElementById("inputBox").value = "";
+
+                // Display a new random word
+                displayRandomWord();
+            }
+        });
+    </script>
+</body>
+</html>
