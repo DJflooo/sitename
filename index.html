@@ -151,7 +151,7 @@
             width: 50%; /* Example width */
             max-width: 450px; /* Example max width */
         }
-        
+
     </style>
 </head>
 <body>
@@ -180,8 +180,8 @@
         <div class="feedback" id="feedback"></div> <!-- Feedback will appear here -->
     </div>
 
-    <audio autoplay>
-        <source src="2025-01-12 18-52-15.mkv" type="audio/mp3">
+    <audio id="IntroAudio" preload="auto" muted>
+        <source src="2025-01-12 18-52-15.mp3" type="audio/mp3">
     </audio>
 
     <script>
@@ -367,6 +367,7 @@
         const title = "Typing exercise 90";
         const titleElement = document.getElementById("title");
         const overlay = document.getElementById("darkOverlay");
+        var audio = document.getElementById('IntroAudio');
 
         // Create an array where letters exist but are hidden initially
         let revealedText = title.split("").map(letter => `<span style="visibility:hidden;">${letter}</span>`);
@@ -397,11 +398,29 @@
                 overlay.style.display = "none"; // Remove after fade
             }, 1000); // Wait 1s for fade effect to complete
         }
+        
+        window.onload = function() {
+        // Play audio and unmute it after a short delay
+        var audio = document.getElementById('IntroAudio');
+        if (audio) {
+            // Play the audio muted at first
+            audio.play().catch(function(error) {
+                console.error('Error playing audio:', error);
+            });
 
-        window.onload = () => {
-            revealRandomLetter(); // Start revealing letters
-            setTimeout(fadeOutElements, 14000);
-        };
+            // Unmute the audio after a short delay (e.g., 1 second)
+            setTimeout(function() {
+                audio.muted = false;
+            }, 1000); // Delay of 1 second (you can adjust the value)
+        } else {
+            console.error('Audio element not found!');
+        }
+
+        // Other functions to start revealing letters and fading out elements
+        revealRandomLetter(); // Start revealing letters
+        setTimeout(fadeOutElements, 14000);
+    };
+        
 
 let currentWord = ""; // Variable to store the current random word
 let score = 0; // Variable to track the score
