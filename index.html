@@ -399,23 +399,31 @@
             }, 1000); // Wait 1s for fade effect to complete
         }
         
-        window.onload = function() {
-        // Play audio and unmute it after a short delay
+        
+    function playAudioOnMouseMove() {
         var audio = document.getElementById('IntroAudio');
+        
+        // Play the audio if it's available
         if (audio) {
-            // Play the audio muted at first
             audio.play().catch(function(error) {
                 console.error('Error playing audio:', error);
             });
 
-            // Unmute the audio after a short delay (e.g., 1 second)
+            // Unmute the audio after a short delay
             setTimeout(function() {
                 audio.muted = false;
-            }, 1000); // Delay of 1 second (you can adjust the value)
-        } else {
-            console.error('Audio element not found!');
+            }, 1000); // Delay of 1 second
         }
+        
+        // Remove the event listener after the first play to avoid replaying multiple times
+        document.removeEventListener('mousemove', playAudioOnMouseMove);
+    }
 
+    // Add the mousemove event listener to trigger the audio
+    document.addEventListener('mousemove', playAudioOnMouseMove);
+    
+    window.onload = function() {
+        // Function to play the audio when the mouse is moved
         // Other functions to start revealing letters and fading out elements
         revealRandomLetter(); // Start revealing letters
         setTimeout(fadeOutElements, 14000);
